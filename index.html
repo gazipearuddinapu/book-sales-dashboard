@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Book Sales Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #141720;
+    --card:     #1a1e2e;
+    --border:   #252a3d;
+    --accent1:  #4f8ef7;
+    --accent2:  #f7944f;
+    --accent3:  #4fcf8e;
+    --text:     #e8ecf4;
+    --muted:    #6b7394;
+    --mono:     'DM Mono', monospace;
+    --sans:     'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 28px 40px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .logo-mark {
+    width: 38px; height: 38px;
+    background: var(--accent1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-left: 2px;
+    margin-bottom: 3px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+  }
+  .tab {
+    padding: 10px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    letter-spacing: .2px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab[data-ds="1"] { --accent: var(--accent1); }
+  .tab[data-ds="2"] { --accent: var(--accent2); }
+  .tab[data-ds="3"] { --accent: var(--accent3); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* ── Main ── */
+  main { padding: 36px 40px; max-width: 1300px; }
+
+  .view { display: none; animation: fadeIn .25s ease; }
+  .view.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* ── KPI row ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 14px 14px 0 0;
+  }
+  .kpi-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .kpi-tag {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 6px;
+  }
+  .kpi-ids {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 8px;
+  }
+
+  /* ── Bottom grid ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── Top 5 Table ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 22px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 13px 22px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  .rank {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    width: 28px;
+  }
+  .date-cell {
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .rev-cell {
+    font-weight: 600;
+    font-size: 14px;
+    text-align: right;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-wrap {
+    height: 3px;
+    background: var(--surface);
+    border-radius: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    opacity: .6;
+  }
+
+  /* ── Chart card ── */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .chart-card img {
+    width: 100%;
+    display: block;
+    background: #fff;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    main { padding: 24px 20px; }
+    header { padding: 20px 20px 0; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-mark">BS</div>
+    <div>
+      <h1>Book Sales Analytics</h1>
+      <div class="subtitle">2024 – 2025 · USD · Three datasets</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-ds="1" onclick="switchTab(1)">Dataset 1</button>
+    <button class="tab"        data-ds="2" onclick="switchTab(2)">Dataset 2</button>
+    <button class="tab"        data-ds="3" onclick="switchTab(3)">Dataset 3</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══════════════ DATA 1 ══════════════ -->
+  <div class="view active" id="view-1" style="--accent:var(--accent1)">
+
+    <div class="section-label">Key Metrics · Dataset 1</div>
+    <div class="kpi-row">
+
+      <div class="kpi" style="--accent:var(--accent1)">
+        <div class="kpi-label">Unique Users</div>
+        <div class="kpi-value">3,115</div>
+        <div class="kpi-sub">3,293 raw records reconciled</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent1)">
+        <div class="kpi-label">Author Sets</div>
+        <div class="kpi-value">325</div>
+        <div class="kpi-sub">unique collaboration groups</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent1)">
+        <div class="kpi-label">Top Author(s)</div>
+        <div class="kpi-value" style="font-size:17px;margin-top:4px">Arlinda Huel</div>
+        <div class="kpi-sub">201 books sold</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent1)">
+        <div class="kpi-label">Best Buyer · User IDs</div>
+        <div class="kpi-ids">[44650]</div>
+        <div class="kpi-sub">$40,279.25 total spent</div>
+      </div>
+
+    </div>
+
+    <div class="bottom-grid">
+      <div class="card" style="--accent:var(--accent1)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Top 5 Days by Revenue</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>Date</th><th style="text-align:right">Revenue</th>
+          </tr></thead>
+          <tbody id="t1"></tbody>
+        </table>
+      </div>
+
+      <div class="chart-card" style="--accent:var(--accent1)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Daily Revenue — Dataset 1</div>
+        </div>
+        <img src="daily_revenue_DATA1.png" alt="Daily Revenue DATA1" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ DATA 2 ══════════════ -->
+  <div class="view" id="view-2" style="--accent:var(--accent2)">
+
+    <div class="section-label">Key Metrics · Dataset 2</div>
+    <div class="kpi-row">
+
+      <div class="kpi" style="--accent:var(--accent2)">
+        <div class="kpi-label">Unique Users</div>
+        <div class="kpi-value">2,663</div>
+        <div class="kpi-sub">after deduplication</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent2)">
+        <div class="kpi-label">Author Sets</div>
+        <div class="kpi-value">293</div>
+        <div class="kpi-sub">unique collaboration groups</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent2)">
+        <div class="kpi-label">Top Author(s)</div>
+        <div class="kpi-value" style="font-size:12px;line-height:1.5;margin-top:6px">Hershel Treutel,<br>Miss Modesto Denesik,<br>Sen. Trula Bosco</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent2)">
+        <div class="kpi-label">Best Buyer · User IDs</div>
+        <div class="kpi-ids">[54419]</div>
+        <div class="kpi-sub">highest total spending</div>
+      </div>
+
+    </div>
+
+    <div class="bottom-grid">
+      <div class="card" style="--accent:var(--accent2)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Top 5 Days by Revenue</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>Date</th><th style="text-align:right">Revenue</th>
+          </tr></thead>
+          <tbody id="t2"></tbody>
+        </table>
+      </div>
+
+      <div class="chart-card" style="--accent:var(--accent2)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Daily Revenue — Dataset 2</div>
+        </div>
+        <img src="daily_revenue_DATA2.png" alt="Daily Revenue DATA2" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ DATA 3 ══════════════ -->
+  <div class="view" id="view-3" style="--accent:var(--accent3)">
+
+    <div class="section-label">Key Metrics · Dataset 3</div>
+    <div class="kpi-row">
+
+      <div class="kpi" style="--accent:var(--accent3)">
+        <div class="kpi-label">Unique Users</div>
+        <div class="kpi-value">3,290</div>
+        <div class="kpi-sub">after deduplication</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent3)">
+        <div class="kpi-label">Author Sets</div>
+        <div class="kpi-value">268</div>
+        <div class="kpi-sub">unique collaboration groups</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent3)">
+        <div class="kpi-label">Top Author(s)</div>
+        <div class="kpi-value" style="font-size:13px;line-height:1.6;margin-top:4px">Coy Streich,<br>Keeley Hand,<br>Lela Emard</div>
+      </div>
+
+      <div class="kpi" style="--accent:var(--accent3)">
+        <div class="kpi-label">Best Buyer · User IDs</div>
+        <div class="kpi-ids">[50855]</div>
+        <div class="kpi-sub">highest total spending</div>
+      </div>
+
+    </div>
+
+    <div class="bottom-grid">
+      <div class="card" style="--accent:var(--accent3)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Top 5 Days by Revenue</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>Date</th><th style="text-align:right">Revenue</th>
+          </tr></thead>
+          <tbody id="t3"></tbody>
+        </table>
+      </div>
+
+      <div class="chart-card" style="--accent:var(--accent3)">
+        <div class="card-header">
+          <div class="card-header-dot"></div>
+          <div class="card-title">Daily Revenue — Dataset 3</div>
+        </div>
+        <img src="daily_revenue_DATA3.png" alt="Daily Revenue DATA3" />
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const DATA = {
+  1: [
+    { date: '2024-12-05', rev: 42218.64 },
+    { date: '2025-03-29', rev: 41930.30 },
+    { date: '2024-11-11', rev: 40265.38 },
+    { date: '2024-09-04', rev: 40260.38 },
+    { date: '2025-03-14', rev: 38376.11 },
+  ],
+  2: [
+    { date: '2025-09-02', rev: 33683.00 },
+    { date: '2024-07-09', rev: 33392.59 },
+    { date: '2025-02-01', rev: 32755.20 },
+    { date: '2024-11-03', rev: 32338.30 },
+    { date: '2025-01-25', rev: 31895.66 },
+  ],
+  3: [
+    { date: '2025-01-29', rev: 47343.39 },
+    { date: '2024-09-16', rev: 36316.19 },
+    { date: '2024-12-09', rev: 35453.63 },
+    { date: '2025-01-16', rev: 33311.91 },
+    { date: '2024-11-26', rev: 32751.86 },
+  ],
+};
+
+function fmt(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderTable(dsNum) {
+  const rows = DATA[dsNum];
+  const max  = rows[0].rev;
+  const tbody = document.getElementById('t' + dsNum);
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td class="rank">${i + 1}</td>
+      <td class="date-cell">
+        ${r.date}
+        <div class="bar-wrap"><div class="bar-fill" style="width:${(r.rev/max*100).toFixed(1)}%"></div></div>
+      </td>
+      <td class="rev-cell">${fmt(r.rev)}</td>
+    </tr>`).join('');
+}
+
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', +t.dataset.ds === n));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + n));
+}
+
+[1, 2, 3].forEach(renderTable);
+</script>
+</body>
+</html>
