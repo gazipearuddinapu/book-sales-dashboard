@@ -3,7 +3,7 @@
 An end-to-end data analysis project on book sales data across three independent datasets (DATA1, DATA2, DATA3).  
 Results are presented in an interactive BI-style dashboard hosted on GitHub Pages.
 
-🔗 **[View Dashboard →](https://YOUR-USERNAME.github.io/book-sales-dashboard/)**
+🔗 **[View Dashboard →](https://gazipearuddinapu.github.io/book-sales-dashboard/)**
 
 ---
 
